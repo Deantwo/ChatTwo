@@ -51,8 +51,6 @@ namespace ChatTwo
         private void btnRegister_Click(object sender, EventArgs e)
         {
             ResetWindow();
-            btnRegister.Enabled = false;
-            btnCancel.Enabled = false;
 
             // If there is no username entered.
             if (tbxUsername.Text == "")
@@ -95,9 +93,14 @@ namespace ChatTwo
                 return;
             }
 
+            btnRegister.Enabled = false;
+            btnCancel.Enabled = false;
+
             lblResult.Text = "Contacting server...";
+            _waitingForCreateUserReply = true;
             byte[] passwordHash = ByteHelper.GetHashBytes(Encoding.Unicode.GetBytes(tbxPassword1.Text));
             ChatTwo_Client_Protocol.MessageToServer(ChatTwo_Protocol.MessageType.CreateUser, passwordHash, tbxUsername.Text);
+            timer1.Start();
         }
 
         public void CreateUserReply(object sender, CreateUserReplyEventArgs args)

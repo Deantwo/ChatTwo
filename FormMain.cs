@@ -60,6 +60,8 @@ namespace ChatTwo
                 if (loggingin.DialogResult == System.Windows.Forms.DialogResult.Yes)
                 {
                     // !?!?!?! Logged in?
+                    button1.Enabled = true;
+                    dgvContacts.Enabled = true;
                 }
             }
         }
@@ -69,23 +71,30 @@ namespace ChatTwo
             CloseForm();
         }
 
+        #region Closing Minimize to Tray
         bool _closing = false;
         private void CloseForm()
         {
-            _client.Stop();
+            // Exiting the program for real.
             _closing = true;
             this.Close();
         }
 
-        #region Minimize to Tray
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
         {
+            // Check if we are exiting the program, or just hiding it.
             if (!_closing)
             {
                 e.Cancel = true;
                 this.Hide();
                 TrayBalloonTip("Minimized to tray", ToolTipIcon.None);
+                return;
             }
+
+            // We are exting the program, stop all threaded workers and stuff.
+            _client.Stop();
+            if (ChatTwo_Client_Protocol.LoggedIn)
+                ChatTwo_Client_Protocol.LogOut();
         }
 
         private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)

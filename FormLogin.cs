@@ -66,8 +66,6 @@ namespace ChatTwo
         private void btnLogin_Click(object sender, EventArgs e)
         {
             ResetWindow();
-            btnLogin.Enabled = false;
-            btnRegister.Enabled = false;
 
             // If there is no username entered.
             if (tbxUsername.Text == "")
@@ -88,6 +86,9 @@ namespace ChatTwo
                 lblResult.Text = "You did not enter a password.";
                 return;
             }
+
+            btnLogin.Enabled = false;
+            btnRegister.Enabled = false;
 
             lblResult.Text = "Contacting server...";
             _waitingForLoginReply = true;

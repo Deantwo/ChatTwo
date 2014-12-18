@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace ChatTwo
 {
@@ -37,13 +38,58 @@ namespace ChatTwo
             set { _userId = value; }
         }
 
+        private static bool _loggedIn = false;
+        public static bool LoggedIn
+        {
+            get { return _loggedIn; }
+            set { _loggedIn = value; }
+        }
+
+        private static Thread _threadKeepalive;
+
+        public static void LogIn(int userId)
+        {
+            _userId = userId;
+            _loggedIn = true;
+
+            _threadKeepalive = new Thread(() => Keepalive());
+            _threadKeepalive.Name = "Keepalive Thread (Keepalive method)";
+            _threadKeepalive.Start();
+        }
+
+        public static void LogOut()
+        {
+            _loggedIn = false;
+
+            //_threadKeepalive.Abort();
+            _threadKeepalive.Join();
+        }
+
+        private static void Keepalive() // Threaded looping method.
+        {
+            try
+            {
+                while (_loggedIn)
+                {
+                    Thread.Sleep(500);
+                    ChatTwo_Client_Protocol.MessageToServer(ChatTwo_Protocol.MessageType.Status, null, null);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("### " + _threadKeepalive.Name + " has crashed:");
+                System.Diagnostics.Debug.WriteLine("### " + ex.Message);
+                System.Diagnostics.Debug.WriteLine("### " + ex.ToString());
+            }
+        }
+
         public static void MessageReceivedHandler(object sender, MessageReceivedEventArgs args)
         {
             if (args.Data[0] == 0x92)
             {
                 string sharedSecret;
                 // Position of the Type byte is 26 (SignatureByteLength + MacByteLength + TimezByteLength).
-                ChatTwo_Protocol.MessageType type = (ChatTwo_Protocol.MessageType)args.Data[ChatTwo_Protocol.SignatureByteLength + ChatTwo_Protocol.HashByteLength + 4];
+                ChatTwo_Protocol.MessageType type = (ChatTwo_Protocol.MessageType)args.Data[ChatTwo_Protocol.SignatureByteLength + ByteHelper.HashByteLength + 4];
                 if (type == ChatTwo_Protocol.MessageType.CreateUserReply)
                 {
                     sharedSecret = "5ny1mzFo4S6nh7hDcqsHVg+DBNU="; // Default hardcoded sharedSecret.
@@ -72,29 +118,30 @@ namespace ChatTwo
                             // Fire an OnCreateUserReply event.
                             CreateUserReplyEventArgs argsCreateUser = new CreateUserReplyEventArgs();
                             argsCreateUser.Success = message.Data[0] == 0x00;
-                            if (!argsCreateUser.Success)
+                            switch (message.Data[0])
                             {
-                                switch (message.Data[0])
-                                {
-                                    case 1:
-                                        argsCreateUser.Message = "A user already exist with that name.";
-                                        break;
-                                }
+                                case 0: // Success.
+                                    break;
+                                case 1: // Username already exist.
+                                    argsCreateUser.Message = "A user already exist with that name.";
+                                    break;
                             }
                             OnCreateUserReply(argsCreateUser);
                             break;
                         case ChatTwo_Protocol.MessageType.LoginReply:
+                            int userId = ByteHelper.ToInt32(args.Data, 1);
+                            LogIn(userId);
                             // Fire an OnLoginReply event.
                             LoginReplyEventArgs argsLogin = new LoginReplyEventArgs();
                             argsLogin.Success = message.Data[0] == 0x00;
-                            if (!argsLogin.Success)
+                            switch (message.Data[0])
                             {
-                                switch (message.Data[0])
-                                {
-                                    case 1:
-                                        argsLogin.Message = "Wrong username orr password.";
-                                        break;
-                                }
+                                case 0: // Success.
+                                    argsLogin.ID = userId;
+                                    break;
+                                case 1: // Wrong password.
+                                    argsLogin.Message = "Wrong username or password.";
+                                    break;
                             }
                             OnLoginReply(argsLogin);
                             break;
@@ -133,25 +180,29 @@ namespace ChatTwo
         }
         public static event EventHandler<LoginReplyEventArgs> LoginReply;
 
-        public static void MessageToServer(ChatTwo_Protocol.MessageType type, byte[] data, string text)
+        public static void MessageToServer(ChatTwo_Protocol.MessageType type, byte[] data = null, string text = null)
         {
             Message message = new Message();
             message.Type = type;
-            message.Data = data;
-            message.Text = text;
+            if (data != null && data.Length != 0)
+                message.Data = data;
+            if (!String.IsNullOrEmpty(text))
+                message.Text = text;
             message.Ip = _serverAddress;
             MessageTransmissionHandler(message);
         }
 
-        public static void MessageToUser(int to, ChatTwo_Protocol.MessageType type, byte[] data, string text)
+        public static void MessageToUser(int to, ChatTwo_Protocol.MessageType type, byte[] data = null, string text = null)
         {
             Message message = new Message();
             //message.From = _userId;
             message.To = to;
             message.Type = type;
-            message.Data = data;
-            message.Text = text;
-            message.Ip = _serverAddress;
+            if (data != null && data.Length != 0)
+                message.Data = data;
+            if (!String.IsNullOrEmpty(text))
+                message.Text = text;
+            //message.Ip = _serverAddress;
             MessageTransmissionHandler(message);
         }
 
@@ -195,7 +246,6 @@ namespace ChatTwo
     public class CreateUserReplyEventArgs : EventArgs
     {
         public bool Success { get; set; }
-        public int ID { get; set; }
         public string Message { get; set; }
     }
 
