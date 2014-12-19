@@ -10,11 +10,11 @@ namespace ChatTwo
 {
     class ChatTwo_Client_Protocol
     {
-        private static List<UserObj> _users = new List<UserObj>();
-        public static List<UserObj> Users
+        private static List<UserObj> _contacts = new List<UserObj>();
+        public static List<UserObj> Contacts
         {
-            get { return _users; }
-            set { _users = value; }
+            get { return _contacts; }
+            set { _contacts = value; }
         }
 
         private static string _serverSharedSecret = "";
@@ -31,11 +31,11 @@ namespace ChatTwo
             set { _serverAddress = value; }
         }
 
-        private static int _userId;
-        public static int UserId
+        private static UserObj _user = new UserObj();
+        public static UserObj User
         {
-            get { return _userId; }
-            set { _userId = value; }
+            get { return _user; }
+            set { _user = value; }
         }
 
         private static bool _loggedIn = false;
@@ -49,7 +49,7 @@ namespace ChatTwo
 
         public static void LogIn(int userId)
         {
-            _userId = userId;
+            _user.ID = userId;
             _loggedIn = true;
 
             _threadKeepalive = new Thread(() => Keepalive());
@@ -92,7 +92,7 @@ namespace ChatTwo
                 ChatTwo_Protocol.MessageType type = (ChatTwo_Protocol.MessageType)args.Data[ChatTwo_Protocol.SignatureByteLength + ByteHelper.HashByteLength + 4 + 4];
                 if (type == ChatTwo_Protocol.MessageType.CreateUserReply)
                 {
-                    sharedSecret = "5ny1mzFo4S6nh7hDcqsHVg+DBNU="; // Default hardcoded sharedSecret.
+                    sharedSecret = ChatTwo_Protocol.DefaultSharedSecret;
                 }
                 else if (type == ChatTwo_Protocol.MessageType.LoginReply)
                 {
@@ -100,9 +100,9 @@ namespace ChatTwo
                 }
                 else
                 {
-                    // Position of the UserID bytes is 26 (SignatureByteLength + MacByteLength + TimezByteLength + UserIdByteLength) with a length of 4.
+                    // Position of the UserID bytes is 26 (SignatureByteLength + MacByteLength + TimezByteLength) with a length of 4.
                     int userId = ByteHelper.ToInt32(args.Data, ChatTwo_Protocol.SignatureByteLength + ByteHelper.HashByteLength + 4);
-                    sharedSecret = _users.Find(x => x.ID == userId).Secret;
+                    sharedSecret = _contacts.Find(x => x.ID == userId).Secret;
                 }
 
                 if (ChatTwo_Protocol.ValidateMac(args.Data, sharedSecret))
@@ -133,18 +133,22 @@ namespace ChatTwo
                             OnCreateUserReply(argsCreateUser);
                             break;
                         case ChatTwo_Protocol.MessageType.LoginReply:
-                            int userId = ByteHelper.ToInt32(args.Data, 1);
-                            LogIn(userId);
                             // Fire an OnLoginReply event.
                             LoginReplyEventArgs argsLogin = new LoginReplyEventArgs();
                             argsLogin.Success = message.Data[0] == 0x00;
                             switch (message.Data[0])
                             {
                                 case 0: // Success.
-                                    argsLogin.ID = userId;
+                                    int userId = ByteHelper.ToInt32(message.Data, 1);
+                                    string username = Encoding.Unicode.GetString(ByteHelper.SubArray(message.Data, 5));
+                                    argsLogin.Name = username;
+                                    LogIn(userId);
                                     break;
                                 case 1: // Wrong password.
                                     argsLogin.Message = "Wrong username or password.";
+                                    break;
+                                case 2: // Already online.
+                                    argsLogin.Message = "That user is already online.";
                                     break;
                             }
                             OnLoginReply(argsLogin);
@@ -157,11 +161,11 @@ namespace ChatTwo
                 }
                 else
                     throw new NotImplementedException("Could not validate the MAC of received message.");
-                // Need to add a simple debug message here, but this works as a great breakpoint until then.
+                    // Need to add a simple debug message here, but this works as a great breakpoint until then.
             }
             else
                 throw new NotImplementedException("Could not validate the signature of the received message. The signature was \"0x" + args.Data[0] + "\" but only \"0x92\" is allowed.");
-            // Need to add a simple debug message here, but this works as a great breakpoint until then.
+                // Need to add a simple debug message here, but this works as a great breakpoint until then.
         }
 
         private static void OnCreateUserReply(CreateUserReplyEventArgs e)
@@ -187,7 +191,7 @@ namespace ChatTwo
         public static void MessageToServer(ChatTwo_Protocol.MessageType type, byte[] data = null, string text = null)
         {
             Message message = new Message();
-            message.From = _userId;
+            message.From = _user.ID;
             message.To = ChatTwo_Protocol.ServerReserrvedUserID;
             message.Type = type;
             if (data != null && data.Length != 0)
@@ -201,37 +205,41 @@ namespace ChatTwo
         public static void MessageToUser(int to, ChatTwo_Protocol.MessageType type, byte[] data = null, string text = null)
         {
             Message message = new Message();
-            message.From = _userId;
+            message.From = _user.ID;
             message.To = to;
             message.Type = type;
             if (data != null && data.Length != 0)
                 message.Data = data;
             if (!String.IsNullOrEmpty(text))
                 message.Text = text;
-            if (_users.Any(x => x.ID == to))
-                message.Ip = _users.Find(x => x.ID == to).Socket;
+            if (_contacts.Any(x => x.ID == to))
+                message.Ip = _contacts.Find(x => x.ID == to).Socket;
             MessageTransmissionHandler(message);
         }
 
         public static void MessageTransmissionHandler(Message message)
         {
+            byte[] messageBytes = ChatTwo_Protocol.MessageTransmissionHandler(message);
+
             string sharedSecret;
             if (message.Type == ChatTwo_Protocol.MessageType.CreateUser)
             {
-                sharedSecret = "5ny1mzFo4S6nh7hDcqsHVg+DBNU="; // Default hardcoded sharedSecret.
+                sharedSecret = ChatTwo_Protocol.DefaultSharedSecret;
+            }
+            else if (message.Type == ChatTwo_Protocol.MessageType.Login)
+            {
+                ServerSharedSecret = ByteHelper.GetHashString(messageBytes);
+                sharedSecret = ServerSharedSecret;
             }
             else if (message.To == ChatTwo_Protocol.ServerReserrvedUserID)
             {
-                ServerSharedSecret = ByteHelper.GetHashString(message.Data);
                 sharedSecret = ServerSharedSecret;
             }
             else
             {
                 int userId = message.To;
-                sharedSecret = _users.Find(x => x.ID == userId).Secret;
+                sharedSecret = _contacts.Find(x => x.ID == userId).Secret;
             }
-
-            byte[] messageBytes = ChatTwo_Protocol.MessageTransmissionHandler(message);
 
             messageBytes = ChatTwo_Protocol.AddSignatureAndMac(messageBytes, sharedSecret);
 
@@ -262,7 +270,7 @@ namespace ChatTwo
     public class LoginReplyEventArgs : EventArgs
     {
         public bool Success { get; set; }
-        public int ID { get; set; }
+        public string Name { get; set; }
         public string Message { get; set; }
     }
 }

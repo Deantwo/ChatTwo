@@ -105,24 +105,31 @@ namespace ChatTwo
 
         public void CreateUserReply(object sender, CreateUserReplyEventArgs args)
         {
-            if (_waitingForCreateUserReply)
+            if (lblResult.InvokeRequired)
+            { // Needed for multi-threading cross calls.
+                this.Invoke(new Action<object, CreateUserReplyEventArgs>(this.CreateUserReply), new object[] { sender, args });
+            }
+            else
             {
-                _waitingForCreateUserReply = false;
-                timer1.Stop();
-                if (args.Success)
+                if (_waitingForCreateUserReply)
                 {
-                    lblResult.Text = "User created successful!";
-                    //_newUserId = args.ID;
-                    this.Close();
-                    this.DialogResult = System.Windows.Forms.DialogResult.OK;
-                    return;
-                }
-                else
-                {
-                    lblResult.ForeColor = Color.Red;
-                    lblResult.Text = args.Message;
-                    btnRegister.Enabled = true;
-                    btnCancel.Enabled = true;
+                    _waitingForCreateUserReply = false;
+                    timer1.Stop();
+                    if (args.Success)
+                    {
+                        lblResult.Text = "User created successful!";
+                        //_newUserId = args.ID;
+                        this.Close();
+                        this.DialogResult = System.Windows.Forms.DialogResult.Yes;
+                        return;
+                    }
+                    else
+                    {
+                        lblResult.ForeColor = Color.Red;
+                        lblResult.Text = args.Message;
+                        btnRegister.Enabled = true;
+                        btnCancel.Enabled = true;
+                    }
                 }
             }
         }

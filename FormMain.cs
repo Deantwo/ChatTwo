@@ -37,7 +37,8 @@ namespace ChatTwo
             StartUdpClient(0);
             //StartUdpClient(9020);
 
-            notifyIcon1.BalloonTipTitle = this.Name;
+            notifyIcon1.BalloonTipTitle = this.Text;
+            notifyIcon1.Text = this.Text;
             notifyIcon1.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
             this.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
         }
@@ -62,6 +63,7 @@ namespace ChatTwo
                     // !?!?!?! Logged in?
                     button1.Enabled = true;
                     dgvContacts.Enabled = true;
+                    toolStripStatusLabel1.Text = "Logged in as " + loggingin.Username;
                 }
             }
         }

@@ -11,7 +11,6 @@ namespace ChatTwo
     {
         public int ID { set; get; }
         public string Name { set; get; }
-        public string Password { set; get; }
         public bool Online { set; get; }
         public IPEndPoint Socket { set; get; }
         public DateTime LastOnline { set; get; }
@@ -33,7 +32,6 @@ namespace ChatTwo
         public override string ToString()
         {
             return "user[" + ID + "] Name: " + Name + Environment.NewLine +
-                   "user[" + ID + "] Password: " + Password + Environment.NewLine +
                    "user[" + ID + "] Online: " + Online + Environment.NewLine +
                    "user[" + ID + "] Socket: " + Socket + Environment.NewLine +
                    "user[" + ID + "] LastOnline: " + LastOnline.ToString("yyyy-MM-dd HH:mm:ss") + Environment.NewLine +

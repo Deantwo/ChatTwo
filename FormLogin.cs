@@ -13,10 +13,10 @@ namespace ChatTwo
     {
         private bool _waitingForLoginReply = false;
 
-        private int _loggedInUserId = 0;
-        public int UserId
+        private string _loggedInUsername;
+        public string Username
         {
-            get { return _loggedInUserId; }
+            get { return _loggedInUsername; }
         }
 
         public FormLogin()
@@ -99,23 +99,30 @@ namespace ChatTwo
 
         public void LoginReply(object sender, LoginReplyEventArgs args)
         {
-            if (_waitingForLoginReply)
+            if (lblResult.InvokeRequired)
+            { // Needed for multi-threading cross calls.
+                this.Invoke(new Action<object, LoginReplyEventArgs>(this.LoginReply), new object[] { sender, args });
+            }
+            else
             {
-                _waitingForLoginReply = false;
-                timer1.Stop();
-                if (args.Success)
+                if (_waitingForLoginReply)
                 {
-                    lblResult.Text = "Login successful!";
-                    _loggedInUserId = args.ID;
-                    this.Close();
-                    this.DialogResult = System.Windows.Forms.DialogResult.OK;
-                    return;
-                }
-                else
-                {
-                    lblResult.ForeColor = Color.Red;
-                    lblResult.Text = args.Message;
-                    btnRegister.Enabled = true;
+                    _waitingForLoginReply = false;
+                    timer1.Stop();
+                    if (args.Success)
+                    {
+                        lblResult.Text = "Login successful!";
+                        _loggedInUsername = args.Name;
+                        this.Close();
+                        this.DialogResult = System.Windows.Forms.DialogResult.Yes;
+                        return;
+                    }
+                    else
+                    {
+                        lblResult.ForeColor = Color.Red;
+                        lblResult.Text = args.Message;
+                        btnRegister.Enabled = true;
+                    }
                 }
             }
         }
