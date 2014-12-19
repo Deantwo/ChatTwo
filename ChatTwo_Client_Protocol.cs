@@ -88,8 +88,8 @@ namespace ChatTwo
             if (args.Data[0] == 0x92)
             {
                 string sharedSecret;
-                // Position of the Type byte is 26 (SignatureByteLength + MacByteLength + TimezByteLength).
-                ChatTwo_Protocol.MessageType type = (ChatTwo_Protocol.MessageType)args.Data[ChatTwo_Protocol.SignatureByteLength + ByteHelper.HashByteLength + 4];
+                // Position of the Type byte is 30 (SignatureByteLength + MacByteLength + TimezByteLength + UserIdByteLength).
+                ChatTwo_Protocol.MessageType type = (ChatTwo_Protocol.MessageType)args.Data[ChatTwo_Protocol.SignatureByteLength + ByteHelper.HashByteLength + 4 + 4];
                 if (type == ChatTwo_Protocol.MessageType.CreateUserReply)
                 {
                     sharedSecret = "5ny1mzFo4S6nh7hDcqsHVg+DBNU="; // Default hardcoded sharedSecret.
@@ -99,7 +99,11 @@ namespace ChatTwo
                     sharedSecret = ServerSharedSecret;
                 }
                 else
-                    sharedSecret = ""; //?!?!?!?!
+                {
+                    // Position of the UserID bytes is 26 (SignatureByteLength + MacByteLength + TimezByteLength + UserIdByteLength) with a length of 4.
+                    int userId = ByteHelper.ToInt32(args.Data, ChatTwo_Protocol.SignatureByteLength + ByteHelper.HashByteLength + 4);
+                    sharedSecret = _users.Find(x => x.ID == userId).Secret;
+                }
 
                 if (ChatTwo_Protocol.ValidateMac(args.Data, sharedSecret))
                 {
@@ -183,6 +187,8 @@ namespace ChatTwo
         public static void MessageToServer(ChatTwo_Protocol.MessageType type, byte[] data = null, string text = null)
         {
             Message message = new Message();
+            message.From = _userId;
+            message.To = ChatTwo_Protocol.ServerReserrvedUserID;
             message.Type = type;
             if (data != null && data.Length != 0)
                 message.Data = data;
@@ -195,14 +201,15 @@ namespace ChatTwo
         public static void MessageToUser(int to, ChatTwo_Protocol.MessageType type, byte[] data = null, string text = null)
         {
             Message message = new Message();
-            //message.From = _userId;
+            message.From = _userId;
             message.To = to;
             message.Type = type;
             if (data != null && data.Length != 0)
                 message.Data = data;
             if (!String.IsNullOrEmpty(text))
                 message.Text = text;
-            //message.Ip = _serverAddress;
+            if (_users.Any(x => x.ID == to))
+                message.Ip = _users.Find(x => x.ID == to).Socket;
             MessageTransmissionHandler(message);
         }
 
@@ -213,13 +220,16 @@ namespace ChatTwo
             {
                 sharedSecret = "5ny1mzFo4S6nh7hDcqsHVg+DBNU="; // Default hardcoded sharedSecret.
             }
-            else if (message.Type == ChatTwo_Protocol.MessageType.Login)
+            else if (message.To == ChatTwo_Protocol.ServerReserrvedUserID)
             {
                 ServerSharedSecret = ByteHelper.GetHashString(message.Data);
                 sharedSecret = ServerSharedSecret;
             }
             else
-                sharedSecret = ""; //!??!?!?!?!
+            {
+                int userId = message.To;
+                sharedSecret = _users.Find(x => x.ID == userId).Secret;
+            }
 
             byte[] messageBytes = ChatTwo_Protocol.MessageTransmissionHandler(message);
 
