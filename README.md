@@ -6,7 +6,7 @@ ChatTwo
 What is it
 ==============
 
-**ChatTwo** is a basic chat program that trys to use peer-to-peer to communicate.<br>
+**ChatTwo** is a basic chat program that try to use peer-to-peer to communicate.<br>
 The main goal of **ChatTwo** is to prove that it is possible for the everyday-person to make a chat program, there by it has to be cheap and easy to use aswell.
 
 Features
@@ -16,13 +16,22 @@ Features
 - Text chat
 - Peer-to-peer communication
 
+Current State
+==============
+
+- Creation of users from the client
+- User login by client
+- ...
+
 Requirements
 ==============
 
+**Both:**
 - .Net Framework 4.0
 
 **ChatTwo-Server:**
 - MySQL Database
+- [MySQL Connector Net](http://dev.mysql.com/downloads/connector/net/)
 
 Links
 ==============
