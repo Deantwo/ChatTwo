@@ -41,15 +41,16 @@
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dgvContacts = new System.Windows.Forms.DataGridView();
-            this.dgvContactsId = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dgvContactsIcon = new System.Windows.Forms.DataGridViewImageColumn();
-            this.dgvContactsName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.button1 = new System.Windows.Forms.Button();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.restoreToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dgvContactsId = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dgvContactsIcon = new System.Windows.Forms.DataGridViewImageColumn();
+            this.dgvContactsStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dgvContactsName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvContacts)).BeginInit();
@@ -60,9 +61,9 @@
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 479);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 438);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(342, 24);
+            this.statusStrip1.Size = new System.Drawing.Size(284, 24);
             this.statusStrip1.TabIndex = 1;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -86,7 +87,7 @@
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(342, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(284, 24);
             this.menuStrip1.TabIndex = 2;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -161,6 +162,7 @@
             this.dgvContacts.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.dgvContactsId,
             this.dgvContactsIcon,
+            this.dgvContactsStatus,
             this.dgvContactsName});
             this.dgvContacts.Enabled = false;
             this.dgvContacts.Location = new System.Drawing.Point(0, 56);
@@ -169,37 +171,8 @@
             this.dgvContacts.RowHeadersVisible = false;
             this.dgvContacts.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
             this.dgvContacts.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.dgvContacts.Size = new System.Drawing.Size(342, 423);
+            this.dgvContacts.Size = new System.Drawing.Size(284, 382);
             this.dgvContacts.TabIndex = 3;
-            // 
-            // dgvContactsId
-            // 
-            this.dgvContactsId.FillWeight = 50F;
-            this.dgvContactsId.HeaderText = "ID";
-            this.dgvContactsId.MinimumWidth = 50;
-            this.dgvContactsId.Name = "dgvContactsId";
-            this.dgvContactsId.ReadOnly = true;
-            this.dgvContactsId.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgvContactsId.Visible = false;
-            this.dgvContactsId.Width = 50;
-            // 
-            // dgvContactsIcon
-            // 
-            this.dgvContactsIcon.FillWeight = 64F;
-            this.dgvContactsIcon.HeaderText = "Avatar";
-            this.dgvContactsIcon.Name = "dgvContactsIcon";
-            this.dgvContactsIcon.ReadOnly = true;
-            this.dgvContactsIcon.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgvContactsIcon.Width = 64;
-            // 
-            // dgvContactsName
-            // 
-            this.dgvContactsName.FillWeight = 5000F;
-            this.dgvContactsName.HeaderText = "Username";
-            this.dgvContactsName.Name = "dgvContactsName";
-            this.dgvContactsName.ReadOnly = true;
-            this.dgvContactsName.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgvContactsName.Width = 5000;
             // 
             // button1
             // 
@@ -227,37 +200,74 @@
             this.toolStripSeparator1,
             this.closeToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(153, 76);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(114, 54);
             // 
             // restoreToolStripMenuItem
             // 
             this.restoreToolStripMenuItem.Name = "restoreToolStripMenuItem";
-            this.restoreToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.restoreToolStripMenuItem.Size = new System.Drawing.Size(113, 22);
             this.restoreToolStripMenuItem.Text = "Restore";
             this.restoreToolStripMenuItem.Click += new System.EventHandler(this.RestoreToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(110, 6);
             // 
             // closeToolStripMenuItem
             // 
             this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-            this.closeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.closeToolStripMenuItem.Size = new System.Drawing.Size(113, 22);
             this.closeToolStripMenuItem.Text = "Close";
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.closeToolStripMenuItem_Click);
+            // 
+            // dgvContactsId
+            // 
+            this.dgvContactsId.FillWeight = 50F;
+            this.dgvContactsId.HeaderText = "ID";
+            this.dgvContactsId.MinimumWidth = 50;
+            this.dgvContactsId.Name = "dgvContactsId";
+            this.dgvContactsId.ReadOnly = true;
+            this.dgvContactsId.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgvContactsId.Visible = false;
+            this.dgvContactsId.Width = 50;
+            // 
+            // dgvContactsIcon
+            // 
+            this.dgvContactsIcon.FillWeight = 64F;
+            this.dgvContactsIcon.HeaderText = "Avatar";
+            this.dgvContactsIcon.Name = "dgvContactsIcon";
+            this.dgvContactsIcon.ReadOnly = true;
+            this.dgvContactsIcon.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgvContactsIcon.Visible = false;
+            this.dgvContactsIcon.Width = 64;
+            // 
+            // dgvContactsStatus
+            // 
+            this.dgvContactsStatus.HeaderText = "Status";
+            this.dgvContactsStatus.Name = "dgvContactsStatus";
+            this.dgvContactsStatus.ReadOnly = true;
+            // 
+            // dgvContactsName
+            // 
+            this.dgvContactsName.FillWeight = 5000F;
+            this.dgvContactsName.HeaderText = "Username";
+            this.dgvContactsName.Name = "dgvContactsName";
+            this.dgvContactsName.ReadOnly = true;
+            this.dgvContactsName.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgvContactsName.Width = 5000;
             // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(342, 503);
+            this.ClientSize = new System.Drawing.Size(284, 462);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.dgvContacts);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
+            this.MinimumSize = new System.Drawing.Size(200, 300);
             this.Name = "FormMain";
             this.Text = "ChatTwo";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormMain_FormClosing);
@@ -282,9 +292,6 @@
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.DataGridView dgvContacts;
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dgvContactsId;
-        private System.Windows.Forms.DataGridViewImageColumn dgvContactsIcon;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dgvContactsName;
         private System.Windows.Forms.NotifyIcon notifyIcon1;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem restoreToolStripMenuItem;
@@ -295,6 +302,10 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dgvContactsId;
+        private System.Windows.Forms.DataGridViewImageColumn dgvContactsIcon;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dgvContactsStatus;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dgvContactsName;
 
     }
 }
