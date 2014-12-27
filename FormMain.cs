@@ -28,11 +28,14 @@ namespace ChatTwo
             ChatTwo_Client_Protocol.MessageTransmission += _client.SendMessage;
 
 #if DEBUG
+            // Localhost as server addressed used for easier testing.
             ChatTwo_Client_Protocol.ServerAddress = new System.Net.IPEndPoint(new System.Net.IPAddress(new byte[] { 127, 0, 0, 1 }), 9020);
 #else
-            // My server IP and port. Need to make this changable.
+            // My server IP and port.
+            // Need to make this changable.
             ChatTwo_Client_Protocol.ServerAddress = new System.Net.IPEndPoint(new System.Net.IPAddress(new byte[] { 87, 52, 32, 46 }), 9020);
 #endif
+            MessageBox.Show(this, "ServerAddress set to " + ChatTwo_Client_Protocol.ServerAddress.ToString() + ".", "ChatTwo ServerAddress");
 
             StartUdpClient(0);
             //StartUdpClient(9020);
@@ -46,10 +49,12 @@ namespace ChatTwo
         private bool StartUdpClient(int port)
         {
             bool worked = _client.Start(port);
+#if DEBUG
             if (worked)
                 MessageBox.Show(this, "UDP server started on port " + _client.Port + ".", "UdpCommunication");
             else
                 MessageBox.Show(this, "UDP server failed on port " + port + ".", "UdpCommunication");
+#endif
             return worked;
         }
 
@@ -58,9 +63,10 @@ namespace ChatTwo
             using (FormLogin loggingin = new FormLogin())
             {
                 loggingin.ShowDialog(this);
-                if (loggingin.DialogResult == System.Windows.Forms.DialogResult.Yes)
+                if (loggingin.DialogResult == System.Windows.Forms.DialogResult.Yes) // The FormLogin's DialogResult is only set to "Yes" if it was closed by a successful login.
                 {
                     // !?!?!?! Logged in?
+                    MessageBox.Show(this, "You have successfully logged in. This is about as far as the prototype goes.", "Login Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     button1.Enabled = true;
                     dgvContacts.Enabled = true;
                     toolStripStatusLabel1.Text = "Logged in as " + loggingin.Username;

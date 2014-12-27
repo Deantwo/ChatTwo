@@ -36,7 +36,7 @@ namespace ChatTwo
             using (FormRegister registering = new FormRegister())
             {
                 registering.ShowDialog(this);
-                if (registering.DialogResult == System.Windows.Forms.DialogResult.Yes)
+                if (registering.DialogResult == System.Windows.Forms.DialogResult.Yes) // The FormRegister's DialogResult is only set to "Yes" if it was closed by a successful user creation.
                 {
                     tbxUsername.Text = registering.Username;
                     tbxPassword.Focus();
