@@ -24,8 +24,8 @@ namespace ChatTwo
 #endif
 
             _client = new UdpCommunication();
-            _client.MessageReceived += ChatTwo_Client_Protocol.MessageReceivedHandler;
-            ChatTwo_Client_Protocol.MessageTransmission += _client.SendMessage;
+            _client.PacketReceived += ChatTwo_Client_Protocol.MessageReceivedHandler;
+            ChatTwo_Client_Protocol.MessageTransmission += _client.SendPacket;
 
 #if DEBUG
             // Localhost as server addressed used for easier testing.
