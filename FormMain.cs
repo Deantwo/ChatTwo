@@ -67,11 +67,31 @@ namespace ChatTwo
                 {
                     // !?!?!?! Logged in?
                     MessageBox.Show(this, "You have successfully logged in. This is about as far as the prototype goes.", "Login Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    button1.Enabled = true;
+                    btnAddContact.Enabled = true;
                     dgvContacts.Enabled = true;
+                    loginToolStripMenuItem.Enabled = false;
+                    logoutToolStripMenuItem.Enabled = true;
                     toolStripStatusLabel1.Text = "Logged in as " + loggingin.Username;
                 }
             }
+        }
+
+        private void logoutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(this, "This feature is sadly not implemented yet." + Environment.NewLine +
+                "" + Environment.NewLine +
+                "Currently the server just detects that you have timed out, but it doesn't forget you were online." + Environment.NewLine +
+                "To try again, please restart the server.", "Logout", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            btnAddContact.Enabled = false;
+            dgvContacts.Enabled = false;
+            logoutToolStripMenuItem.Enabled = false;
+            ChatTwo_Client_Protocol.LogOut();
+            loginToolStripMenuItem.Enabled = true;
+        }
+
+        private void btnAddContact_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(this, "This feature is sadly not implemented yet.", "Add Contact", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
