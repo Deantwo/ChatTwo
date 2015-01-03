@@ -119,9 +119,9 @@ namespace ChatTwo
                     }
                     else
                     {
+                        ResetControls();
                         lblResult.ForeColor = Color.Red;
                         lblResult.Text = args.Message;
-                        btnRegister.Enabled = true;
                     }
                 }
             }
