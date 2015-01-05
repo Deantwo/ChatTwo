@@ -159,13 +159,17 @@ namespace ChatTwo
                             break;
                     }
                 }
+#if DEBUG
                 else
                     throw new NotImplementedException("Could not validate the MAC of received message.");
                     // Need to add a simple debug message here, but this works as a great breakpoint until then.
+#endif
             }
+#if DEBUG
             else
                 throw new NotImplementedException("Could not validate the signature of the received message. The signature was \"0x" + args.Data[0] + "\" but only \"0x92\" is allowed.");
                 // Need to add a simple debug message here, but this works as a great breakpoint until then.
+#endif
         }
 
         private static void OnCreateUserReply(CreateUserReplyEventArgs e)
