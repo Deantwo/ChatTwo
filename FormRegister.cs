@@ -95,6 +95,9 @@ namespace ChatTwo
 
             btnRegister.Enabled = false;
             btnCancel.Enabled = false;
+            tbxUsername.ReadOnly = true;
+            tbxPassword1.ReadOnly = true;
+            tbxPassword2.ReadOnly = true;
 
             lblResult.Text = "Contacting server...";
             _waitingForCreateUserReply = true;
@@ -129,6 +132,9 @@ namespace ChatTwo
                         lblResult.Text = args.Message;
                         btnRegister.Enabled = true;
                         btnCancel.Enabled = true;
+                        tbxUsername.ReadOnly = false;
+                        tbxPassword1.ReadOnly = false;
+                        tbxPassword2.ReadOnly = false;
                     }
                 }
             }
@@ -141,6 +147,9 @@ namespace ChatTwo
                 _waitingForCreateUserReply = false;
                 btnRegister.Enabled = true;
                 btnCancel.Enabled = true;
+                tbxUsername.ReadOnly = false;
+                tbxPassword1.ReadOnly = false;
+                tbxPassword2.ReadOnly = false;
                 timer1.Stop();
                 lblResult.ForeColor = Color.Red;
                 lblResult.Text = "No response from server.";

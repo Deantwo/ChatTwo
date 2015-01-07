@@ -31,7 +31,7 @@ namespace ChatTwo
             set { _serverAddress = value; }
         }
 
-        private static UserObj _user = new UserObj();
+        private static UserObj _user;
         public static UserObj User
         {
             get { return _user; }
@@ -49,6 +49,7 @@ namespace ChatTwo
 
         public static void LogIn(int userId)
         {
+            _user = new UserObj();
             _user.ID = userId;
             _loggedIn = true;
 
@@ -63,6 +64,8 @@ namespace ChatTwo
 
             //_threadKeepalive.Abort();
             _threadKeepalive.Join();
+
+            _user = null;
         }
 
         private static void Keepalive() // Threaded looping method.
@@ -90,19 +93,19 @@ namespace ChatTwo
                 string sharedSecret;
                 // Position of the Type byte is 30 (SignatureByteLength + MacByteLength + TimezByteLength + UserIdByteLength).
                 ChatTwo_Protocol.MessageType type = (ChatTwo_Protocol.MessageType)args.Data[ChatTwo_Protocol.SignatureByteLength + ByteHelper.HashByteLength + 4 + 4];
+                // Position of the UserID bytes is 26 (SignatureByteLength + MacByteLength + TimezByteLength) with a length of 4.
+                int senderId = ByteHelper.ToInt32(args.Data, ChatTwo_Protocol.SignatureByteLength + ByteHelper.HashByteLength + 4);
                 if (type == ChatTwo_Protocol.MessageType.CreateUserReply)
                 {
                     sharedSecret = ChatTwo_Protocol.DefaultSharedSecret;
                 }
-                else if (type == ChatTwo_Protocol.MessageType.LoginReply)
+                else if (senderId == 0)
                 {
                     sharedSecret = ServerSharedSecret;
                 }
                 else
                 {
-                    // Position of the UserID bytes is 26 (SignatureByteLength + MacByteLength + TimezByteLength) with a length of 4.
-                    int userId = ByteHelper.ToInt32(args.Data, ChatTwo_Protocol.SignatureByteLength + ByteHelper.HashByteLength + 4);
-                    sharedSecret = _contacts.Find(x => x.ID == userId).Secret;
+                    sharedSecret = _contacts.Find(x => x.ID == senderId).Secret;
                 }
 
                 if (ChatTwo_Protocol.ValidateMac(args.Data, sharedSecret))
@@ -119,44 +122,73 @@ namespace ChatTwo
                     switch (message.Type)
                     {
                         case ChatTwo_Protocol.MessageType.CreateUserReply:
-                            // Fire an OnCreateUserReply event.
-                            CreateUserReplyEventArgs argsCreateUser = new CreateUserReplyEventArgs();
-                            argsCreateUser.Success = message.Data[0] == 0x00;
-                            switch (message.Data[0])
                             {
-                                case 0: // Success.
-                                    break;
-                                case 1: // Username already exist.
-                                    argsCreateUser.Message = "A user already exist with that name.";
-                                    break;
+                                // Fire an OnCreateUserReply event.
+                                CreateUserReplyEventArgs argsCreateUser = new CreateUserReplyEventArgs();
+                                argsCreateUser.Success = message.Data[0] == 0x00;
+                                switch (message.Data[0])
+                                {
+                                    case 0: // Success.
+                                        break;
+                                    case 1: // Username already exist.
+                                        argsCreateUser.Message = "A user already exist with that name.";
+                                        break;
+                                }
+                                OnCreateUserReply(argsCreateUser);
+                                break;
                             }
-                            OnCreateUserReply(argsCreateUser);
-                            break;
                         case ChatTwo_Protocol.MessageType.LoginReply:
-                            // Fire an OnLoginReply event.
-                            LoginReplyEventArgs argsLogin = new LoginReplyEventArgs();
-                            argsLogin.Success = message.Data[0] == 0x00;
-                            switch (message.Data[0])
                             {
-                                case 0: // Success.
-                                    int userId = ByteHelper.ToInt32(message.Data, 1);
-                                    string username = Encoding.Unicode.GetString(ByteHelper.SubArray(message.Data, 5));
-                                    argsLogin.Name = username;
-                                    LogIn(userId);
-                                    break;
-                                case 1: // Wrong password.
-                                    argsLogin.Message = "Wrong username or password.";
-                                    break;
-                                case 2: // Already online.
-                                    argsLogin.Message = "That user is already online.";
-                                    break;
+                                // Fire an OnLoginReply event.
+                                LoginReplyEventArgs argsLogin = new LoginReplyEventArgs();
+                                argsLogin.Success = message.Data[0] == 0x00;
+                                switch (message.Data[0])
+                                {
+                                    case 0: // Success.
+                                        int userId = ByteHelper.ToInt32(message.Data, 1);
+                                        string username = Encoding.Unicode.GetString(ByteHelper.SubArray(message.Data, 5));
+                                        LogIn(userId);
+                                        _user.Name = username;
+                                        argsLogin.Name = username;
+                                        break;
+                                    case 1: // Wrong password.
+                                        argsLogin.Message = "Wrong username or password.";
+                                        break;
+                                    case 2: // Already online.
+                                        argsLogin.Message = "That user is already online.";
+                                        break;
+                                }
+                                OnLoginReply(argsLogin);
+                                break;
                             }
-                            OnLoginReply(argsLogin);
-                            break;
+                        case ChatTwo_Protocol.MessageType.ContactRequestReply:
+                            {
+                                // Fire an OnAddContactReply event.
+                                AddContactReplyEventArgs argsAddContact = new AddContactReplyEventArgs();
+                                argsAddContact.Success = message.Data[0] == 0x00;
+                                switch (message.Data[0])
+                                {
+                                    case 0: // Success.
+                                        break;
+                                    case 1: // No user with that name.
+                                        argsAddContact.Message = "No user with that name.";
+                                        break;
+                                    case 2: // You can't add your self.
+                                        argsAddContact.Message = "You can't add your self.";
+                                        break;
+                                    case 3: // User is already a contact.
+                                        argsAddContact.Message = "User is already a contact.";
+                                        break;
+                                }
+                                OnAddContactReply(argsAddContact);
+                                break;
+                            }
                         case ChatTwo_Protocol.MessageType.Message:
-                            messageData = ByteHelper.SubArray(args.Data, 0, 7);
-                            messageText = Encoding.Unicode.GetString(ByteHelper.SubArray(messageBytes, 8));
-                            break;
+                            {
+                                messageData = ByteHelper.SubArray(args.Data, 0, 7);
+                                messageText = Encoding.Unicode.GetString(ByteHelper.SubArray(messageBytes, 8));
+                                break;
+                            }
                     }
                 }
 #if DEBUG
@@ -192,10 +224,23 @@ namespace ChatTwo
         }
         public static event EventHandler<LoginReplyEventArgs> LoginReply;
 
+        private static void OnAddContactReply(AddContactReplyEventArgs e)
+        {
+            EventHandler<AddContactReplyEventArgs> handler = AddContactReply;
+            if (handler != null)
+            {
+                handler(null, e);
+            }
+        }
+        public static event EventHandler<AddContactReplyEventArgs> AddContactReply;
+
         public static void MessageToServer(ChatTwo_Protocol.MessageType type, byte[] data = null, string text = null)
         {
             Message message = new Message();
-            message.From = _user.ID;
+            if (_user != null)
+                message.From = _user.ID;
+            else
+                message.From = Int32.MaxValue;
             message.To = ChatTwo_Protocol.ServerReserrvedUserID;
             message.Type = type;
             if (data != null && data.Length != 0)
@@ -275,6 +320,12 @@ namespace ChatTwo
     {
         public bool Success { get; set; }
         public string Name { get; set; }
+        public string Message { get; set; }
+    }
+
+    public class AddContactReplyEventArgs : EventArgs
+    {
+        public bool Success { get; set; }
         public string Message { get; set; }
     }
 }

@@ -65,8 +65,6 @@ namespace ChatTwo
                 loggingin.ShowDialog(this);
                 if (loggingin.DialogResult == System.Windows.Forms.DialogResult.Yes) // The FormLogin's DialogResult is only set to "Yes" if it was closed by a successful login.
                 {
-                    // !?!?!?! Logged in?
-                    MessageBox.Show(this, "You have successfully logged in. This is about as far as the prototype goes.", "Login Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     btnAddContact.Enabled = true;
                     dgvContacts.Enabled = true;
                     loginToolStripMenuItem.Enabled = false;
@@ -78,10 +76,10 @@ namespace ChatTwo
 
         private void logoutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(this, "This feature is sadly not implemented yet." + Environment.NewLine +
+            MessageBox.Show(this, "This feature is sadly not fully implemented yet." + Environment.NewLine +
                 "" + Environment.NewLine +
-                "Currently the server just detects that you have timed out, but it doesn't forget you were online." + Environment.NewLine +
-                "To try again, please restart the server.", "Logout", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                "Currently the server just detects that you have timed out." + Environment.NewLine +
+                "So wait 10 seconds before trying to log in again.", "Logout", MessageBoxButtons.OK, MessageBoxIcon.Information);
             btnAddContact.Enabled = false;
             dgvContacts.Enabled = false;
             logoutToolStripMenuItem.Enabled = false;
@@ -91,7 +89,11 @@ namespace ChatTwo
 
         private void btnAddContact_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(this, "This feature is sadly not implemented yet.", "Add Contact", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            using (FormAddContact contactRequest = new FormAddContact())
+            {
+                contactRequest.ShowDialog(this);
+                // Don't really care about the dialog result for this.
+            }
         }
 
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -120,9 +122,9 @@ namespace ChatTwo
             }
 
             // We are exting the program, stop all threaded workers and stuff.
-            _client.Stop();
             if (ChatTwo_Client_Protocol.LoggedIn)
                 ChatTwo_Client_Protocol.LogOut();
+            _client.Stop();
         }
 
         private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)

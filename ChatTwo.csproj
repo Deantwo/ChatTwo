@@ -73,6 +73,12 @@
     <Compile Include="FormChat.Designer.cs">
       <DependentUpon>FormChat.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormAddContact.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormAddContact.Designer.cs">
+      <DependentUpon>FormAddContact.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormLogin.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -97,6 +103,9 @@
     <Compile Include="UserObj.cs" />
     <EmbeddedResource Include="FormChat.resx">
       <DependentUpon>FormChat.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormAddContact.resx">
+      <DependentUpon>FormAddContact.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormLogin.resx">
       <DependentUpon>FormLogin.cs</DependentUpon>
