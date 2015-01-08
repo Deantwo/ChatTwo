@@ -133,6 +133,9 @@ namespace ChatTwo
                                     case 1: // Username already exist.
                                         argsCreateUser.Message = "A user already exist with that name.";
                                         break;
+                                    case 2:
+                                        argsCreateUser.Message = "Username is too short or too long.";
+                                        break;
                                 }
                                 OnCreateUserReply(argsCreateUser);
                                 break;

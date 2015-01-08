@@ -62,6 +62,16 @@ namespace ChatTwo
                 return;
             }
 
+            // If the username is too long.
+            if (tbxUsername.Text.Length > 30)
+            {
+                lblUsername.ForeColor = Color.Red;
+                tbxUsername.ForeColor = Color.Red;
+                lblResult.ForeColor = Color.Red;
+                lblResult.Text = "The username is too long. Please use 30 or less characters.";
+                return;
+            }
+
             // If there is no password entered.
             if (tbxPassword1.Text == "")
             {
