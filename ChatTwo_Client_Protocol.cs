@@ -112,13 +112,6 @@ namespace ChatTwo
                 {
                     Message message = ChatTwo_Protocol.MessageReceivedHandler(args);
 
-                    IPEndPoint messageSender = message.Ip;
-                    //type = message.Type;
-                    byte[] messageBytes = message.Data;
-
-                    byte[] messageData = new byte[0];
-                    string messageText = "";
-
                     switch (message.Type)
                     {
                         case ChatTwo_Protocol.MessageType.CreateUserReply:
@@ -188,8 +181,7 @@ namespace ChatTwo
                             }
                         case ChatTwo_Protocol.MessageType.Message:
                             {
-                                messageData = ByteHelper.SubArray(args.Data, 0, 7);
-                                messageText = Encoding.Unicode.GetString(ByteHelper.SubArray(messageBytes, 8));
+                                // ?
                                 break;
                             }
                     }
