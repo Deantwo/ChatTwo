@@ -10,8 +10,8 @@ namespace ChatTwo
 {
     class ChatTwo_Client_Protocol
     {
-        private static List<UserObj> _contacts = new List<UserObj>();
-        public static List<UserObj> Contacts
+        private static List<ContactObj> _contacts = new List<ContactObj>();
+        public static List<ContactObj> Contacts
         {
             get { return _contacts; }
             set { _contacts = value; }
@@ -66,6 +66,7 @@ namespace ChatTwo
             _threadKeepalive.Join();
 
             _user = null;
+            _contacts.Clear();
         }
 
         private static void Keepalive() // Threaded looping method.
@@ -75,7 +76,14 @@ namespace ChatTwo
                 while (_loggedIn)
                 {
                     Thread.Sleep(500);
-                    ChatTwo_Client_Protocol.MessageToServer(ChatTwo_Protocol.MessageType.Status, null, null);
+                    List<ContactObj> onlineContacts = _contacts.FindAll(x => x.Online == true);
+                    byte[] contactIds = new byte[0];
+                    foreach (ContactObj contact in onlineContacts)
+                    {
+                        byte[] contactId = BitConverter.GetBytes(contact.ID);
+                        contactIds = ByteHelper.ConcatinateArray(contactIds, contactId);
+                    }
+                    ChatTwo_Client_Protocol.MessageToServer(ChatTwo_Protocol.MessageType.Status, contactIds, null);
                 }
             }
             catch (Exception ex)
@@ -179,6 +187,32 @@ namespace ChatTwo
                                 OnAddContactReply(argsAddContact);
                                 break;
                             }
+                        case ChatTwo_Protocol.MessageType.ContactStatus:
+                            {
+                                int contactId = ByteHelper.ToInt32(message.Data, 0);
+                                int nameLength = ((31 & message.Data[4]) * 2);
+                                ContactObj contact;
+                                if (_contacts.Any(x => x.ID == contactId))
+                                    contact = _contacts.Find(x => x.ID == contactId);
+                                else
+                                {
+                                    contact = new ContactObj();
+                                    contact.ID = contactId;
+                                    contact.Name = Encoding.Unicode.GetString(message.Data, 5, nameLength);
+                                    _contacts.Add(contact);
+                                }
+                                contact.Online = ByteHelper.CheckBitCodeIndex(message.Data[4], 7);
+                                contact.RelationshipTo = ByteHelper.CheckBitCodeIndex(message.Data[4], 6);
+                                contact.RelationshipFrom = ByteHelper.CheckBitCodeIndex(message.Data[4], 5);
+                                if (contact.Online)
+                                {   
+                                    int port = ByteHelper.ToInt32(message.Data, 5 + nameLength);
+                                    contact.Socket = new IPEndPoint(new IPAddress(ByteHelper.SubArray(message.Data, 5 + nameLength + 4)), port);
+                                }
+                                // Fire an OnContactUpdate event.
+                                OnContactUpdate();
+                                break;
+                            }
                         case ChatTwo_Protocol.MessageType.Message:
                             {
                                 // ?
@@ -228,6 +262,16 @@ namespace ChatTwo
             }
         }
         public static event EventHandler<AddContactReplyEventArgs> AddContactReply;
+
+        private static void OnContactUpdate()
+        {
+            EventHandler<EventArgs> handler = ContactUpdate;
+            if (handler != null)
+            {
+                handler(null, new EventArgs());
+            }
+        }
+        public static event EventHandler<EventArgs> ContactUpdate;
 
         public static void MessageToServer(ChatTwo_Protocol.MessageType type, byte[] data = null, string text = null)
         {

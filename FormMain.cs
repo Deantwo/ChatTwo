@@ -26,6 +26,7 @@ namespace ChatTwo
             _client = new UdpCommunication();
             _client.PacketReceived += ChatTwo_Client_Protocol.MessageReceivedHandler;
             ChatTwo_Client_Protocol.MessageTransmission += _client.SendPacket;
+            ChatTwo_Client_Protocol.ContactUpdate += UpdateContactList;
 
 #if DEBUG
             // Localhost as server addressed used for easier testing.
@@ -93,6 +94,34 @@ namespace ChatTwo
             {
                 contactRequest.ShowDialog(this);
                 // Don't really care about the dialog result for this.
+            }
+        }
+
+        private void UpdateContactList(object sender, EventArgs e)
+        {
+            if (dgvContacts.InvokeRequired)
+            { // Needed for multi-threading cross calls.
+                this.Invoke(new Action<object, EventArgs>(this.UpdateContactList), new object[] { sender, e });
+            }
+            else
+            {
+                dgvContacts.Rows.Clear();
+                dgvContacts.Refresh();
+                foreach (ContactObj contact in ChatTwo_Client_Protocol.Contacts)
+                {
+                    DataGridViewRow row;
+                    //if (dgvContacts.Rows.
+                    //    row = 
+                    //else
+                    { 
+                        dgvContacts.Rows.Add();
+                        row = dgvContacts.Rows[dgvContacts.Rows.Count - 1];
+                    }
+                    row.Cells["dgvContactsId"].Value = contact.ID;
+                    row.Cells["dgvContactsName"].Value = contact.Name;
+                    row.Cells["dgvContactsStatus"].Value = contact.GetStatus();
+                    //row.Cells["dgvContactsIcon"].Value = contact.;
+                }
             }
         }
 
