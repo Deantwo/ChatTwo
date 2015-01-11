@@ -77,15 +77,16 @@ namespace ChatTwo
 
         private void logoutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(this, "This feature is sadly not fully implemented yet." + Environment.NewLine +
-                "" + Environment.NewLine +
-                "Currently the server just detects that you have timed out." + Environment.NewLine +
-                "So wait 10 seconds before trying to log in again.", "Logout", MessageBoxButtons.OK, MessageBoxIcon.Information);
             btnAddContact.Enabled = false;
             dgvContacts.Enabled = false;
             logoutToolStripMenuItem.Enabled = false;
             ChatTwo_Client_Protocol.LogOut();
             loginToolStripMenuItem.Enabled = true;
+            toolStripStatusLabel1.Text = "Logged out";
+            MessageBox.Show(this, "This feature is sadly not fully implemented yet." + Environment.NewLine +
+                "" + Environment.NewLine +
+                "Currently the server just detects that you have timed out." + Environment.NewLine +
+                "So wait 10 seconds before trying to log in again.", "Logout", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void btnAddContact_Click(object sender, EventArgs e)

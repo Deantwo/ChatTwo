@@ -67,6 +67,7 @@ namespace ChatTwo
 
             _user = null;
             _contacts.Clear();
+            OnContactUpdate();
         }
 
         private static void Keepalive() // Threaded looping method.
