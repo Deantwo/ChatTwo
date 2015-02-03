@@ -115,6 +115,9 @@ namespace ChatTwo
                 else
                 {
                     sharedSecret = _contacts.Find(x => x.ID == senderId).Secret;
+
+                    // Testing!!!! REMOVE THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    sharedSecret = ChatTwo_Protocol.DefaultSharedSecret;
                 }
 
                 if (ChatTwo_Protocol.ValidateMac(args.Data, sharedSecret))
@@ -216,7 +219,20 @@ namespace ChatTwo
                             }
                         case ChatTwo_Protocol.MessageType.Message:
                             {
-                                // ?
+                                ContactObj contact;
+                                if (_contacts.Any(x => x.ID == message.From && x.RelationshipTo && x.RelationshipFrom))
+                                {
+                                    contact = _contacts.Find(x => x.ID == message.From);
+                                    OpenChat(contact.ID);
+                                    message.Text = Encoding.Unicode.GetString(message.Data);
+                                    contact.ChatWindow.ReceiveMessage(message.Text);
+                                }
+                                else
+#if DEBUG
+                                    throw new NotImplementedException("You received a message from someone that isn't your contact?");
+#else
+                                    return;
+#endif
                                 break;
                             }
                     }
@@ -274,6 +290,18 @@ namespace ChatTwo
         }
         public static event EventHandler<EventArgs> ContactUpdate;
 
+        public static void OpenChat(int userId)
+        {
+            ContactObj contact = ChatTwo_Client_Protocol.Contacts.Find(x => x.ID == userId);
+            if (contact.ChatWindow != null)
+            {
+                if (!contact.ChatWindow.Visible)
+                    contact.ChatWindow.Show();
+            }
+            else
+                new FormChat(contact).Show();
+        }
+
         public static void MessageToServer(ChatTwo_Protocol.MessageType type, byte[] data = null, string text = null)
         {
             Message message = new Message();
@@ -328,6 +356,9 @@ namespace ChatTwo
             {
                 int userId = message.To;
                 sharedSecret = _contacts.Find(x => x.ID == userId).Secret;
+
+                // Testing!!!! REMOVE THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                sharedSecret = ChatTwo_Protocol.DefaultSharedSecret;
             }
 
             messageBytes = ChatTwo_Protocol.AddSignatureAndMac(messageBytes, sharedSecret);

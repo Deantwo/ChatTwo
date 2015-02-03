@@ -47,14 +47,20 @@
             this.dgvContactsName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.btnAddContact = new System.Windows.Forms.Button();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.cmsNotifyIcon = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.restoreToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cmsContactList = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.cmsContactListMessage = new System.Windows.Forms.ToolStripMenuItem();
+            this.cmsContactListSeparator = new System.Windows.Forms.ToolStripSeparator();
+            this.cmsContactListRemoveContact = new System.Windows.Forms.ToolStripMenuItem();
+            this.cmsContactListAddContact = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvContacts)).BeginInit();
-            this.contextMenuStrip1.SuspendLayout();
+            this.cmsNotifyIcon.SuspendLayout();
+            this.cmsContactList.SuspendLayout();
             this.SuspendLayout();
             // 
             // statusStrip1
@@ -105,7 +111,7 @@
             // loginToolStripMenuItem
             // 
             this.loginToolStripMenuItem.Name = "loginToolStripMenuItem";
-            this.loginToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.loginToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
             this.loginToolStripMenuItem.Text = "Login";
             this.loginToolStripMenuItem.Click += new System.EventHandler(this.loginToolStripMenuItem_Click);
             // 
@@ -113,19 +119,19 @@
             // 
             this.logoutToolStripMenuItem.Enabled = false;
             this.logoutToolStripMenuItem.Name = "logoutToolStripMenuItem";
-            this.logoutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.logoutToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
             this.logoutToolStripMenuItem.Text = "Logout";
             this.logoutToolStripMenuItem.Click += new System.EventHandler(this.logoutToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(109, 6);
             // 
             // closeToolStripMenuItem1
             // 
             this.closeToolStripMenuItem1.Name = "closeToolStripMenuItem1";
-            this.closeToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.closeToolStripMenuItem1.Size = new System.Drawing.Size(112, 22);
             this.closeToolStripMenuItem1.Text = "Close";
             this.closeToolStripMenuItem1.Click += new System.EventHandler(this.closeToolStripMenuItem_Click);
             // 
@@ -174,6 +180,9 @@
             this.dgvContacts.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.dgvContacts.Size = new System.Drawing.Size(284, 382);
             this.dgvContacts.TabIndex = 3;
+            this.dgvContacts.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgvContacts_CellMouseDoubleClick);
+            this.dgvContacts.CellMouseDown += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgvContacts_CellMouseDown);
+            this.dgvContacts.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dgvContacts_KeyDown);
             // 
             // dgvContactsId
             // 
@@ -226,19 +235,19 @@
             // 
             this.notifyIcon1.BalloonTipText = "notifyIcon1";
             this.notifyIcon1.BalloonTipTitle = "notifyIcon1";
-            this.notifyIcon1.ContextMenuStrip = this.contextMenuStrip1;
+            this.notifyIcon1.ContextMenuStrip = this.cmsNotifyIcon;
             this.notifyIcon1.Text = "notifyIcon1";
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
             // 
-            // contextMenuStrip1
+            // cmsNotifyIcon
             // 
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.cmsNotifyIcon.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.restoreToolStripMenuItem,
             this.toolStripSeparator1,
             this.closeToolStripMenuItem});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(114, 54);
+            this.cmsNotifyIcon.Name = "contextMenuStrip1";
+            this.cmsNotifyIcon.Size = new System.Drawing.Size(114, 54);
             // 
             // restoreToolStripMenuItem
             // 
@@ -259,6 +268,40 @@
             this.closeToolStripMenuItem.Text = "Close";
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.closeToolStripMenuItem_Click);
             // 
+            // cmsContactList
+            // 
+            this.cmsContactList.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.cmsContactListMessage,
+            this.cmsContactListSeparator,
+            this.cmsContactListRemoveContact,
+            this.cmsContactListAddContact});
+            this.cmsContactList.Name = "cmsContactList";
+            this.cmsContactList.Size = new System.Drawing.Size(163, 76);
+            this.cmsContactList.Opening += new System.ComponentModel.CancelEventHandler(this.cmsContactList_Opening);
+            // 
+            // cmsContactListMessage
+            // 
+            this.cmsContactListMessage.Name = "cmsContactListMessage";
+            this.cmsContactListMessage.Size = new System.Drawing.Size(162, 22);
+            this.cmsContactListMessage.Text = "Message";
+            // 
+            // cmsContactListSeparator
+            // 
+            this.cmsContactListSeparator.Name = "cmsContactListSeparator";
+            this.cmsContactListSeparator.Size = new System.Drawing.Size(159, 6);
+            // 
+            // cmsContactListRemoveContact
+            // 
+            this.cmsContactListRemoveContact.Name = "cmsContactListRemoveContact";
+            this.cmsContactListRemoveContact.Size = new System.Drawing.Size(162, 22);
+            this.cmsContactListRemoveContact.Text = "Remove Contact";
+            // 
+            // cmsContactListAddContact
+            // 
+            this.cmsContactListAddContact.Name = "cmsContactListAddContact";
+            this.cmsContactListAddContact.Size = new System.Drawing.Size(162, 22);
+            this.cmsContactListAddContact.Text = "Add Contact";
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -278,7 +321,8 @@
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvContacts)).EndInit();
-            this.contextMenuStrip1.ResumeLayout(false);
+            this.cmsNotifyIcon.ResumeLayout(false);
+            this.cmsContactList.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -295,7 +339,7 @@
         private System.Windows.Forms.DataGridView dgvContacts;
         private System.Windows.Forms.Button btnAddContact;
         private System.Windows.Forms.NotifyIcon notifyIcon1;
-        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ContextMenuStrip cmsNotifyIcon;
         private System.Windows.Forms.ToolStripMenuItem restoreToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem;
@@ -308,6 +352,11 @@
         private System.Windows.Forms.DataGridViewImageColumn dgvContactsIcon;
         private System.Windows.Forms.DataGridViewTextBoxColumn dgvContactsStatus;
         private System.Windows.Forms.DataGridViewTextBoxColumn dgvContactsName;
+        private System.Windows.Forms.ContextMenuStrip cmsContactList;
+        private System.Windows.Forms.ToolStripMenuItem cmsContactListMessage;
+        private System.Windows.Forms.ToolStripSeparator cmsContactListSeparator;
+        private System.Windows.Forms.ToolStripMenuItem cmsContactListRemoveContact;
+        private System.Windows.Forms.ToolStripMenuItem cmsContactListAddContact;
 
     }
 }

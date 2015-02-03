@@ -98,6 +98,7 @@ namespace ChatTwo
             }
         }
 
+        #region DataGridView
         private void UpdateContactList(object sender, EventArgs e)
         {
             if (dgvContacts.InvokeRequired)
@@ -125,6 +126,66 @@ namespace ChatTwo
                 }
             }
         }
+
+        private void dgvContacts_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
+        { // Based on: http://stackoverflow.com/questions/1718389/right-click-context-menu-for-datagrid.
+            if (e.ColumnIndex != -1 && e.RowIndex != -1 && e.Button == System.Windows.Forms.MouseButtons.Right)
+            {
+                DataGridView dgv = (sender as DataGridView);
+                dgv.ContextMenuStrip = cmsContactList;
+                DataGridViewCell currentCell = dgv[e.ColumnIndex, e.RowIndex];
+                currentCell.DataGridView.ClearSelection();
+                currentCell.DataGridView.CurrentCell = currentCell;
+                currentCell.Selected = true;
+                //Rectangle r = currentCell.DataGridView.GetCellDisplayRectangle(currentCell.ColumnIndex, currentCell.RowIndex, false);
+                //Point p = new Point(r.X + r.Width, r.Y + r.Height);
+                Point p = dgvContacts.PointToClient(Control.MousePosition);
+                dgv.ContextMenuStrip.Show(currentCell.DataGridView, p);
+                dgv.ContextMenuStrip = null;
+            }
+        }
+
+        private void dgvContacts_KeyDown(object sender, KeyEventArgs e)
+        { // Based on: http://stackoverflow.com/questions/1718389/right-click-context-menu-for-datagrid.
+            DataGridView dgv = (sender as DataGridView);
+            DataGridViewCell currentCell = dgv.CurrentCell;
+            if (currentCell != null)
+            {
+                cmsContactList_Opening(null, null);
+                if ((e.KeyCode == Keys.F10 && !e.Control && e.Shift) || e.KeyCode == Keys.Apps)
+                {
+                    dgv.ContextMenuStrip = cmsContactList;
+                    Rectangle r = currentCell.DataGridView.GetCellDisplayRectangle(currentCell.ColumnIndex, currentCell.RowIndex, false);
+                    Point p = new Point(r.X + r.Width, r.Y + r.Height);
+                    dgv.ContextMenuStrip.Show(currentCell.DataGridView, p);
+                    dgv.ContextMenuStrip = null;
+                }
+                else if (e.KeyCode == Keys.Enter && !e.Control && !e.Shift && !e.Alt)
+                    ChatTwo_Client_Protocol.OpenChat((int)dgv.Rows[currentCell.RowIndex].Cells["dgvContactsId"].Value);
+            }
+        }
+
+        private void cmsContactList_Opening(object sender, CancelEventArgs e)
+        {
+            // Get currentRow.
+            DataGridViewRow currentRow = dgvContacts.CurrentRow;
+            ContactObj contact = ChatTwo_Client_Protocol.Contacts.Find(x => x.ID == (int)currentRow.Cells["dgvContactsId"].Value);
+
+            bool mutual = (contact.RelationshipTo && contact.RelationshipFrom);
+            cmsContactListMessage.Visible = mutual;
+            cmsContactListSeparator.Visible = mutual;
+            cmsContactListRemoveContact.Visible = contact.RelationshipTo;
+            cmsContactListAddContact.Visible = (!contact.RelationshipTo && contact.RelationshipFrom);
+        }
+
+        private void dgvContacts_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            // Get currentRow.
+            DataGridViewRow currentRow = dgvContacts.CurrentRow;
+            ContactObj contact = ChatTwo_Client_Protocol.Contacts.Find(x => x.ID == (int)currentRow.Cells["dgvContactsId"].Value);
+            ChatTwo_Client_Protocol.OpenChat((int)currentRow.Cells["dgvContactsId"].Value);
+        }
+        #endregion
 
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
         {
